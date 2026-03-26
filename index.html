@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TTracker</title>
+  <meta name="description" content="Track TRT, labs, and symptoms in one place. Visualize levels, stay consistent, and understand your progress over time." />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff;
+      --card: #f5f5f7;
+      --text: #111111;
+      --muted: #555555;
+      --accent: #0a84ff;
+      --accent-soft: rgba(10, 132, 255, 0.12);
+      --border: rgba(0,0,0,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --hero-gradient: radial-gradient(circle at top, rgba(10,132,255,0.10), transparent 35%);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --card: #1c1c1e;
+        --text: #f5f5f7;
+        --muted: #b0b0b5;
+        --accent-soft: rgba(10, 132, 255, 0.16);
+        --border: rgba(255,255,255,0.10);
+        --shadow: 0 16px 40px rgba(0,0,0,0.35);
+        --hero-gradient: radial-gradient(circle at top, rgba(10,132,255,0.18), transparent 38%);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      background-image: var(--hero-gradient);
+      background-repeat: no-repeat;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 72px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0a84ff, #34c759);
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+    }
+
+    .button:hover {
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+
+    .button-primary {
+      background: var(--text);
+      color: var(--bg);
+      border-color: transparent;
+    }
+
+    .button-secondary {
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 0 0 16px;
+      max-width: 12ch;
+    }
+
+    .hero-copy {
+      color: var(--muted);
+      font-size: 1.08rem;
+      max-width: 58ch;
+      margin: 0 0 22px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .hero-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .hero-device {
+      display: flex;
+      justify-content: center;
+    }
+
+    .device-frame {
+      width: min(100%, 390px);
+      background: linear-gradient(180deg, #0c0c0d, #1a1a1d);
+      border-radius: 38px;
+      padding: 12px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .device-screen {
+      border-radius: 28px;
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #000;
+    }
+
+    .section {
+      margin: 56px 0;
+    }
+
+    .section-head {
+      margin-bottom: 22px;
+      max-width: 760px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin: 0 0 10px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.08rem;
+      line-height: 1.2;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .shots {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .shot {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .trust {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .trust .card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .cta {
+      text-align: center;
+      padding: 30px;
+      border-radius: 28px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .cta h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .cta p {
+      margin: 0 auto 18px;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    footer nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 960px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+      .features,
+      .trust,
+      .shots {
+        grid-template-columns: 1fr;
+      }
+      .hero-device {
+        order: -1;
+      }
+      h1 {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="nav">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>TTracker</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="/privacy/">Privacy</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="pill">TRT tracking, simplified</div>
+        <h1>Track TRT, labs, and symptoms in one place.</h1>
+        <p class="hero-copy">Visualize testosterone levels, stay consistent with your protocol, and understand your progress over time in a private, simple app designed for clarity.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#" aria-label="Download on the App Store">Download on the App Store</a>
+          <a class="button button-secondary" href="/privacy/">Read Privacy Policy</a>
+        </div>
+        <p class="hero-note">No account required. Data stays on device by default, with optional private iCloud sync.</p>
+      </div>
+
+      <div class="hero-device">
+        <div class="device-frame">
+          <!-- Replace hero-screenshot.png with one of your exported App Store screenshots -->
+          <img class="device-screen" src="hero-screenshot.png" alt="TTracker dashboard showing testosterone level estimates and injection tracking" />
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="section-head">
+        <h2 class="section-title">Built to make TRT tracking clear and useful.</h2>
+        <p class="section-sub">TTracker focuses on the essentials: injections, symptoms, labs, and a simple way to understand trends over time.</p>
+      </div>
+
+      <div class="features">
+        <article class="card">
+          <h3>Track injections</h3>
+          <p>Log your protocol, review injection history, and stay consistent with reminders and schedule tracking.</p>
+        </article>
+        <article class="card">
+          <h3>Monitor symptoms</h3>
+          <p>Track energy, mood, libido, and sleep so you can connect how you feel with how your protocol is working.</p>
+        </article>
+        <article class="card">
+          <h3>View lab progress</h3>
+          <p>Store hormone labs and key markers, then review your progress over time in one place.</p>
+        </article>
+        <article class="card">
+          <h3>Visualize levels</h3>
+          <p>See estimated peaks, troughs, and trends to better understand how your routine behaves over time.</p>
+        </article>
+        <article class="card">
+          <h3>Private by default</h3>
+          <p>No account, no analytics, and no third-party tracking. Your data stays with you unless you choose to export or sync.</p>
+        </article>
+        <article class="card">
+          <h3>Simple and focused</h3>
+          <p>A clean interface designed for clarity, consistency, and quick daily use on iPhone and iPad.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="screenshots" class="section">
+      <div class="section-head">
+        <h2 class="section-title">See the app in action.</h2>
+        <p class="section-sub">Reuse your App Store screenshots here. Replace the image file names below with your final exported assets.</p>
+      </div>
+
+      <div class="shots">
+        <figure class="shot">
+          <img src="screenshot-1.png" alt="TTracker screenshot showing testosterone dashboard" />
+        </figure>
+        <figure class="shot">
+          <img src="screenshot-2.png" alt="TTracker screenshot showing injection logging" />
+        </figure>
+        <figure class="shot">
+          <img src="screenshot-3.png" alt="TTracker screenshot showing injection history" />
+        </figure>
+        <figure class="shot">
+          <img src="screenshot-4.png" alt="TTracker screenshot showing symptom tracking" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">Designed for trust.</h2>
+        <p class="section-sub">Health apps should be clear about privacy, storage, and what they do — and don’t do.</p>
+      </div>
+
+      <div class="trust">
+        <article class="card">
+          <strong>No account required</strong>
+          <p>You can use TTracker without creating an account or handing over personal information.</p>
+        </article>
+        <article class="card">
+          <strong>Local first</strong>
+          <p>Your data is stored on your device by default, with optional private iCloud sync using your Apple account.</p>
+        </article>
+        <article class="card">
+          <strong>Informational only</strong>
+          <p>TTracker is built for tracking and understanding trends. It does not provide medical advice, diagnosis, or treatment.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="cta">
+        <h2>Ready to start tracking?</h2>
+        <p>Use TTracker to stay organized, review trends, and keep your TRT data in one clear, private place.</p>
+        <div class="hero-actions" style="justify-content:center; margin-bottom:0;">
+          <a class="button button-primary" href="#" aria-label="Download on the App Store">Download on the App Store</a>
+          <a class="button button-secondary" href="/privacy/">Privacy Policy</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>© 2026 TTracker</div>
+      <nav>
+        <a href="/privacy/">Privacy</a>
+        <a href="mailto:support@ttrackerapp.com">Support</a>
+      </nav>
+    </footer>
+  </main>
+</body>
+</html>
